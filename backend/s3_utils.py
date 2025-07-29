@@ -39,4 +39,4 @@ def generate_presigned_url(filename: str, content_type: str):
         print(e)
         return
     
-    return presigned
+    return {'url': presigned, 'key': key_url}
