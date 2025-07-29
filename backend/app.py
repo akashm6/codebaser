@@ -1,8 +1,10 @@
-from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
+from routes import router
 import os
 
 app = FastAPI()
+app.include_router(router)
 
 final_frontend_url = os.getenv("FINAL_FRONTEND_URL") or None
 
@@ -18,5 +20,7 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+
 
 
