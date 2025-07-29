@@ -2,6 +2,9 @@
 import { useState } from "react";
 
 export default function ZipUploader() {
+
+  const FASTAPI_BACKEND = process.env.NEXT_PUBLIC_FASTAPI_BACKEND;
+
   const [file, setFile] = useState(null);
   const [uploadStatus, setStatus] = useState("Idle");
 
@@ -10,14 +13,18 @@ export default function ZipUploader() {
     if (!selected || !selected.name.endsWith(".zip")) return;
     setFile(selected);
 
-    const payload = {
-        name: selected.name,
-        content_type: selected.type,
-        size: selected.size
-    }
-
-    const res = await fetch(`http://localhost:8000/generate-presigned-url?filename=${selected.name}&content_type=${selected.type}`);
+    const res = await fetch(
+      ` ${FASTAPI_BACKEND}/generate-presigned-url?filename=${selected.name}&content_type=${selected.type}`
+    );
     const { url, key } = await res.json();
+
+    const payload = {
+    s3_key: key,
+    name: selected.name,
+    content_type: selected.type,
+    size: selected.size,
+
+    };
 
     await fetch(url, {
       method: "PUT",
@@ -25,7 +32,7 @@ export default function ZipUploader() {
       body: selected,
     });
 
-    const res2 = await fetch("http://localhost:8000/zip-processing", {
+    const res2 = await fetch(`${FASTAPI_BACKEND}/zip-processing`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
