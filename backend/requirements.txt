@@ -1,4 +1,9 @@
 fastapi
+uvicorn[standard]
+SQLAlchemy
+celery
+redis
 boto3
 python-dotenv
 requests
+pydantic
