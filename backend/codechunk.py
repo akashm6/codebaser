@@ -11,28 +11,28 @@ TS_NODE_TYPES = JS_NODE_TYPES + ("interface_declaration", "type_alias_declaratio
 JAVA_NODE_TYPES = ("method_declaration", "class_declaration", "constructor_declaration", "interface_declaration")
 GO_NODE_TYPES = ("function_declaration", "method_declaration", "type_declaration", "const_declaration", "var_declaration")
 
+def extract_chunk(node, code: str, file_path: str):
+    start_byte = node.start_byte
+    end_byte = node.end_byte
+    start_line = node.start_point[0] + 1
+    end_line = node.end_point[0] + 1
+    chunk_text = code[start_byte:end_byte]
+
+    return {
+        "text": chunk_text,
+        "file_path": file_path,
+        "start_line": start_line,
+        "end_line": end_line,
+        "type": node.type
+    }
+
 def chunk_python(tree: Optional[Tree], code: str, file_path: str) -> List[Dict]:
     chunks = []
     root_node = tree.root_node
 
-    def extract_chunk(node):
-        start_byte = node.start_byte
-        end_byte = node.end_byte
-        start_line = node.start_point[0] + 1
-        end_line = node.end_point[0] + 1
-        chunk_text = code[start_byte:end_byte]
-
-        return {
-            "text": chunk_text,
-            "file_path": file_path,
-            "start_line": start_line,
-            "end_line": end_line,
-            "type": node.type
-        }
-
     def walk_and_collect(node):
         if node.type in PY_NODE_TYPES:
-            chunks.append(extract_chunk(node))
+            chunks.append(extract_chunk(node, code, file_path))
         for child in node.children:
             walk_and_collect(child)
 
@@ -43,24 +43,9 @@ def chunk_javascript(tree: Optional[Tree], code: str, file_path: str) -> List[Di
     chunks = []
     root_node = tree.root_node
 
-    def extract_chunk(node):
-        start_byte = node.start_byte
-        end_byte = node.end_byte
-        start_line = node.start_point[0] + 1
-        end_line = node.end_point[0] + 1
-        chunk_text = code[start_byte:end_byte]
-
-        return {
-            "text": chunk_text,
-            "file_path": file_path,
-            "start_line": start_line,
-            "end_line": end_line,
-            "type": node.type
-        }
-
     def walk_and_collect(node):
         if node.type in JS_NODE_TYPES:
-            chunks.append(extract_chunk(node))
+            chunks.append(extract_chunk(node, code, file_path))
         for child in node.children:
             walk_and_collect(child)
 
@@ -71,24 +56,9 @@ def chunk_typescript(tree: Optional[Tree], code: str, file_path: str) -> List[Di
     chunks = []
     root_node = tree.root_node
 
-    def extract_chunk(node):
-        start_byte = node.start_byte
-        end_byte = node.end_byte
-        start_line = node.start_point[0] + 1
-        end_line = node.end_point[0] + 1
-        chunk_text = code[start_byte:end_byte]
-
-        return {
-            "text": chunk_text,
-            "file_path": file_path,
-            "start_line": start_line,
-            "end_line": end_line,
-            "type": node.type
-        }
-
     def walk_and_collect(node):
         if node.type in TS_NODE_TYPES:
-            chunks.append(extract_chunk(node))
+            chunks.append(extract_chunk(node, code, file_path))
         for child in node.children:
             walk_and_collect(child)
 
@@ -99,24 +69,9 @@ def chunk_java(tree: Optional[Tree], code: str, file_path: str) -> List[Dict]:
     chunks = []
     root_node = tree.root_node
 
-    def extract_chunk(node):
-        start_byte = node.start_byte
-        end_byte = node.end_byte
-        start_line = node.start_point[0] + 1
-        end_line = node.end_point[0] + 1
-        chunk_text = code[start_byte:end_byte]
-
-        return {
-            "text": chunk_text,
-            "file_path": file_path,
-            "start_line": start_line,
-            "end_line": end_line,
-            "type": node.type
-        }
-
     def walk_and_collect(node):
         if node.type in JAVA_NODE_TYPES:
-            chunks.append(extract_chunk(node))
+            chunks.append(extract_chunk(node, code, file_path))
         for child in node.children:
             walk_and_collect(child)
 
@@ -127,24 +82,9 @@ def chunk_go(tree: Optional[Tree], code: str, file_path: str) -> List[Dict]:
     chunks = []
     root_node = tree.root_node
 
-    def extract_chunk(node):
-        start_byte = node.start_byte
-        end_byte = node.end_byte
-        start_line = node.start_point[0] + 1
-        end_line = node.end_point[0] + 1
-        chunk_text = code[start_byte:end_byte]
-
-        return {
-            "text": chunk_text,
-            "file_path": file_path,
-            "start_line": start_line,
-            "end_line": end_line,
-            "type": node.type
-        }
-
     def walk_and_collect(node):
         if node.type in GO_NODE_TYPES:
-            chunks.append(extract_chunk(node))
+            chunks.append(extract_chunk(node, code, file_path))
         for child in node.children:
             walk_and_collect(child)
 
