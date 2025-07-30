@@ -4,3 +4,4 @@ __pycache__
 .DS_*
 *.txt 
 !requirements.txt
+parsers/
