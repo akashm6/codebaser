@@ -3,5 +3,7 @@ venv/
 __pycache__
 .DS_*
 *.txt 
+test*
 !requirements.txt
 parsers/
+
