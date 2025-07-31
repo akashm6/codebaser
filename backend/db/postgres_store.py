@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from db.models import Base, Chunk
-from chroma_store import get_chunk_id
 from dotenv import load_dotenv
-from typing import List
+from typing import List, Dict
+import hashlib
 import os
 
 load_dotenv()
@@ -35,6 +35,10 @@ def insert_chunk(chunk: dict):
     session.commit()
     print("succesfully inserted")
     session.close()
+
+def get_chunk_id(chunk: Dict) -> str:
+    base = f"{chunk['file_path']}:{chunk['start_line']}-{chunk['end_line']}"
+    return hashlib.sha256(base.encode()).hexdigest()
 
 def get_chunks_by_ids(chunk_ids: List[str]) -> List[dict]:
     chunks = []
