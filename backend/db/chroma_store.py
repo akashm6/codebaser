@@ -1,15 +1,13 @@
+from postgres_store import get_chunks_by_ids, get_chunk_id
+from embedding.summarize import get_embedding
 from chromadb.config import Settings
-from typing import Dict
+from typing import Dict, List 
 import chromadb
 import hashlib
 
 client = chromadb.PersistentClient(path='./chroma_storage')
 
 collection = client.get_or_create_collection(name="code_chunks")
-
-def get_chunk_id(chunk: Dict) -> str:
-    base = f"{chunk['file_path']}:{chunk['start_line']}-{chunk['end_line']}"
-    return hashlib.sha256(base.encode()).hexdigest()
 
 def store_embedding(chunk: Dict):
     chunk_id = get_chunk_id(chunk)
@@ -28,3 +26,17 @@ def store_embedding(chunk: Dict):
         metadatas=[metadata],
         documents=[chunk["text"]]
     )
+    
+# embed a user query and grab the top k matching chunks
+def search_codebase(user_query: str, k: int = 5):
+    query_embedding = get_embedding(user_query)
+    results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=k,
+        include=["metadatas"]
+    )
+
+    top_k_ids = results["ids"][0]
+    metadata = get_chunks_by_ids(top_k_ids)
+
+    return metadata
