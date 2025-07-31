@@ -1,4 +1,4 @@
-from codechunk import chunk_go, chunk_java, chunk_javascript, chunk_python, chunk_typescript
+from parallel_processing.codechunk import chunk_go, chunk_java, chunk_javascript, chunk_python, chunk_typescript
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tree_sitter import Parser, Language
 from pathlib import Path
@@ -50,11 +50,19 @@ def concurrent_parse(source_dir: str, max_workers: int = 8):
             if extension in LANG_MAP:
                 file_paths.append(os.path.join(root, f))
 
-    print(f"discovered {len(file_paths)} code files")
+    #print(f"discovered {len(file_paths)} code files")
     chunks = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(parse_and_chunk_file, file_path) for file_path in file_paths]
         for future in as_completed(futures):
             chunks.extend(future.result())
-    
+    # logging
+    '''
+    count = 1
+    for c in chunks:
+        print(f"CHUNK #{count}")
+        print("=" * 40)
+        print(c)
+        count += 1
+    '''
     return chunks
