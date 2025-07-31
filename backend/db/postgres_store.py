@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from db.models import Base, Chunk
 from chroma_store import get_chunk_id
 from dotenv import load_dotenv
+from typing import List
 import os
 
 load_dotenv()
@@ -34,6 +35,25 @@ def insert_chunk(chunk: dict):
     session.commit()
     print("succesfully inserted")
     session.close()
+
+def get_chunks_by_ids(chunk_ids: List[str]) -> List[dict]:
+    chunks = []
+    session = SessionLocal()
+    rows = session.query(Chunk).filter(Chunk.id.in_(chunk_ids)).all()
+    session.close()
+
+    for r in rows:
+        c = {
+        "chunk_id": r.id,
+        "file_path": r.file_path,
+        "start_line": r.start_line,
+        "end_line": r.end_line,
+        "type": r.type,
+        "summary": r.summary,
+        }
+        chunks.append(c)
+
+    return chunks
 
 def create_tables():
     Base.metadata.create_all(engine)    
