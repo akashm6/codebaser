@@ -6,4 +6,5 @@ __pycache__
 test*
 !requirements.txt
 parsers/
+chroma_storage/
 
