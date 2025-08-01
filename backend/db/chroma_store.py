@@ -1,4 +1,4 @@
-from postgres_store import get_chunks_by_ids, get_chunk_id
+from db.postgres_store import get_chunks_by_ids, get_chunk_id
 from embedding.summarize import get_embedding
 from chromadb.config import Settings
 from typing import Dict, List 
@@ -29,14 +29,18 @@ def store_embedding(chunk: Dict):
     
 # embed a user query and grab the top k matching chunks
 def search_codebase(user_query: str, k: int = 5):
+    top_chunks = []
     query_embedding = get_embedding(user_query)
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=k,
-        include=["metadatas"]
+        include=["metadatas", "documents"]
     )
 
     top_k_ids = results["ids"][0]
-    metadata = get_chunks_by_ids(top_k_ids)
+    for i in range(len(top_k_ids)):
+        metadata = results["metadatas"][0][i]
+        metadata["text"] = results["documents"][0][i] 
+        top_chunks.append(metadata)
 
-    return metadata
+    return top_chunks
