@@ -1,4 +1,7 @@
 from parallel_processing.multiprocessor import concurrent_parse
+from db.chroma_store import search_codebase, store_embedding
+from db.postgres_store import insert_chunk
+from embedding.summarize import synthesize_answer, embed_and_summarize_chunk
 from s3_utils import generate_presigned_url, s3
 from fastapi import APIRouter, Query
 from dotenv import load_dotenv
@@ -15,6 +18,9 @@ class ZipFileModel(BaseModel):
     name: str
     content_type: str
     size: int
+
+class AskRequest(BaseModel):
+    query: str
 
 router = APIRouter()
 BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
@@ -37,6 +43,12 @@ def process_zip(zip: ZipFileModel):
             base_path = temp_path.replace(".zip", "")
             z.extractall(base_path)
             chunks = concurrent_parse(base_path)
+            
+            for chunk in chunks:
+                enriched = embed_and_summarize_chunk(chunk)
+                insert_chunk(enriched)
+                store_embedding(enriched)
+                
             return {
                 "name": zip.name,
                 "content_type": zip.content_type,
@@ -45,6 +57,16 @@ def process_zip(zip: ZipFileModel):
                 "message": "Successfully parsed zip"
             }
 
+@router.post("/ask")
+def ask_question(req: AskRequest):
+    query = req.query
+    top_chunks = search_codebase(query, k=5)  # or 8 if you want more context
+    answer = synthesize_answer(query, top_chunks)
+
+    return {
+        "answer": answer,
+        "chunks": top_chunks,
+    }
 @router.get("/")
 def server_test():
     return "Server running correctly."
