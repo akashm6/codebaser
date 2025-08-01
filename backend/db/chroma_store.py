@@ -11,6 +11,7 @@ collection = client.get_or_create_collection(name="code_chunks")
 
 def store_embedding(chunk: Dict):
     chunk_id = get_chunk_id(chunk)
+    #print(f"Storing chunk for user_id={chunk['user_id']}")
 
     metadata = {
         "file_path": chunk["file_path"],
@@ -18,6 +19,7 @@ def store_embedding(chunk: Dict):
         "end_line": chunk["end_line"],
         "summary": chunk["summary"],
         "type": chunk["type"],
+        "user_id": chunk["user_id"]
     }
 
     collection.add(
@@ -28,13 +30,14 @@ def store_embedding(chunk: Dict):
     )
     
 # embed a user query and grab the top k matching chunks
-def search_codebase(user_query: str, k: int = 5):
+def search_codebase(user_query: str, user_id: str, k: int = 5):
     top_chunks = []
     query_embedding = get_embedding(user_query)
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=k,
-        include=["metadatas", "documents"]
+        include=["metadatas", "documents"],
+        where={"user_id": user_id}
     )
 
     top_k_ids = results["ids"][0]
