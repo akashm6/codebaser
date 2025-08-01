@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
-import { createHighlighter } from 'shiki'
 import { HighlightedCode } from '@/components/ui/SyntaxHighlighter' 
 
 export default function Workspace() {
@@ -15,14 +14,20 @@ export default function Workspace() {
 
   const FASTAPI_BACKEND = process.env.NEXT_PUBLIC_FASTAPI_BACKEND
 
+
   async function askQuestion() {
     if (!query) return toast.error('Enter a question')
     setIsLoading(true)
 
+    const token = localStorage.getItem("auth_token");
+
     try {
       const res = await fetch(`${FASTAPI_BACKEND}/ask`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify({ query }),
       })
 
