@@ -1,56 +1,63 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
-import { motion } from 'framer-motion'
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 export default function Home() {
-  const router = useRouter()
-  const [zipFile, setZipFile] = useState<File | null>(null)
-  const [githubUrl, setGithubUrl] = useState('')
-  const [isUploading, setIsUploading] = useState(false)
+  const router = useRouter();
+  const [zipFile, setZipFile] = useState<File | null>(null);
+  const [githubUrl, setGithubUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
-  const FASTAPI_BACKEND = process.env.NEXT_PUBLIC_FASTAPI_BACKEND
+  const FASTAPI_BACKEND = process.env.NEXT_PUBLIC_FASTAPI_BACKEND;
 
   async function handleUpload() {
-    if (!zipFile) return toast.error('Please select a file')
-    setIsUploading(true)
+    if (!zipFile) return toast.error("Please select a file");
+    setIsUploading(true);
 
-    const res = await fetch(`${FASTAPI_BACKEND}/generate-presigned-url?filename=${zipFile.name}&content_type=${zipFile.type}`)
-    const { url, key } = await res.json()
+    const res = await fetch(
+      `${FASTAPI_BACKEND}/generate-presigned-url?filename=${zipFile.name}&content_type=${zipFile.type}`
+    );
+    const { url, key } = await res.json();
 
     await fetch(url, {
-      method: 'PUT',
-      headers: { 'Content-Type': zipFile.type },
+      method: "PUT",
+      headers: { "Content-Type": zipFile.type },
       body: zipFile,
-    })
+    });
 
     const payload = {
       s3_key: key,
       name: zipFile.name,
       content_type: zipFile.type,
       size: zipFile.size,
-    }
+    };
 
+    const token = localStorage.getItem("auth_token");
+    console.log(token);
     const res2 = await fetch(`${FASTAPI_BACKEND}/zip-processing`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(payload),
-    })
+    });
 
     if (res2.ok) {
-      toast.success('Upload complete!')
-      router.push('/workspace')
+      toast.success("Upload complete!");
+      router.push("/workspace");
     } else {
-      toast.error('Processing failed')
+      toast.error("Processing failed");
     }
 
-    setIsUploading(false)
+    setIsUploading(false);
   }
 
   return (
@@ -60,9 +67,17 @@ export default function Home() {
           AI-Powered Codebase Intelligence
         </h1>
         <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-          Upload a zip file or GitHub repo and start asking questions about your code instantly.
+          Upload a zip file or GitHub repo and start asking questions about your
+          code instantly.
         </p>
       </div>
+      <Button
+        onClick={() =>
+          (window.location.href = `${process.env.NEXT_PUBLIC_FASTAPI_BACKEND}/auth/github/login`)
+        }
+      >
+        Login with GitHub
+      </Button>
 
       <Card className="w-full max-w-md border border-border bg-card/50 backdrop-blur">
         <CardHeader>
@@ -75,14 +90,28 @@ export default function Home() {
               <TabsTrigger value="github">GitHub Repo</TabsTrigger>
             </TabsList>
             <TabsContent value="zip" className="mt-4 space-y-4">
-              <Input type="file" accept=".zip" onChange={(e) => setZipFile(e.target.files?.[0] || null)} />
-              <Button onClick={handleUpload} disabled={isUploading} className="w-full">
-                {isUploading ? 'Uploading...' : 'Upload & Analyze'}
+              <Input
+                type="file"
+                accept=".zip"
+                onChange={(e) => setZipFile(e.target.files?.[0] || null)}
+              />
+              <Button
+                onClick={handleUpload}
+                disabled={isUploading}
+                className="w-full"
+              >
+                {isUploading ? "Uploading..." : "Upload & Analyze"}
               </Button>
             </TabsContent>
             <TabsContent value="github" className="mt-4 space-y-4">
-              <Input placeholder="https://github.com/user/repo" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} />
-              <Button disabled className="w-full">Coming soon</Button>
+              <Input
+                placeholder="https://github.com/user/repo"
+                value={githubUrl}
+                onChange={(e) => setGithubUrl(e.target.value)}
+              />
+              <Button disabled className="w-full">
+                Coming soon
+              </Button>
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -96,5 +125,5 @@ export default function Home() {
         ↓ Scroll to see how it works ↓
       </motion.div>
     </main>
-  )
+  );
 }
