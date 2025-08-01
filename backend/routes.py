@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 import tempfile
 import zipfile
-import boto3
 import os
 
 load_dotenv()
@@ -60,7 +59,7 @@ def process_zip(zip: ZipFileModel):
 @router.post("/ask")
 def ask_question(req: AskRequest):
     query = req.query
-    top_chunks = search_codebase(query, k=5)  # or 8 if you want more context
+    top_chunks = search_codebase(query, k=5)
     answer = synthesize_answer(query, top_chunks)
 
     return {
