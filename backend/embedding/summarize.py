@@ -1,7 +1,7 @@
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from dotenv import load_dotenv
 from openai import OpenAI
-from typing import Dict
+from typing import Dict, List
 import os
 
 load_dotenv()
@@ -45,3 +45,31 @@ def embed_and_summarize_chunk(chunk: Dict) -> Dict:
     chunk["summary"] = summary
     chunk["embedding"] = embedding
     return chunk
+
+@retry(wait=wait_random_exponential(min=1, max=5), stop=stop_after_attempt(3))
+def synthesize_answer(query: str, chunks: List[Dict]) -> str:
+    context_sections = []
+    for c in chunks:
+        snippet = f"""### Chunk from {c['file_path']} ({c['start_line']}-{c['end_line']}):
+        Summary: {c['summary']}"""
+        context_sections.append(snippet)
+
+        context_block = "\n\n".join(context_sections)
+
+        prompt = f"""You are a codebase assistant. Based on the following summaries, answer the user's question as clearly as possible.
+
+        Question: {query}
+
+        Relevant context:
+        {context_block}
+
+        Answer:"""
+
+    response = client.responses.create(
+        model=SUMMARY_MODEL,
+        input=prompt,
+        temperature=0.4,
+    )
+
+    return response.output_text.strip()
+
