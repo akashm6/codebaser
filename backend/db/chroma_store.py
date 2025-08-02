@@ -11,7 +11,6 @@ collection = client.get_or_create_collection(name="code_chunks")
 
 def store_embedding(chunk: Dict):
     chunk_id = get_chunk_id(chunk)
-    #print(f"Storing chunk for user_id={chunk['user_id']}")
 
     metadata = {
         "file_path": chunk["file_path"],

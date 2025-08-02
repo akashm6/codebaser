@@ -33,7 +33,6 @@ def insert_chunk(chunk: dict):
 
     session.merge(db_chunk)
     session.commit()
-    print("succesfully inserted")
     session.close()
 
 def get_chunk_id(chunk: Dict) -> str:
