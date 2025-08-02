@@ -24,6 +24,7 @@ GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
 GITHUB_REDIRECT_URI = os.getenv("GITHUB_REDIRECT_URI")
 JWT_SECRET = os.getenv("JWT_SECRET")
+FINAL_FRONTEND_URL = os.getenv("FINAL_FRONTEND_URL")
 
 class ZipFileModel(BaseModel):
     s3_key: str
@@ -183,7 +184,7 @@ async def github_callback(code: str):
         }
         token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
-        redirect_url = f"http://localhost:3000/auth-success?token={token}"
+        redirect_url = f"{FINAL_FRONTEND_URL}/auth-success?token={token}"
         return RedirectResponse(url=redirect_url)
        
 @router.get("/")
