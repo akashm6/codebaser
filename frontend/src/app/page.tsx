@@ -101,7 +101,6 @@ export default function Home() {
       },
       body: JSON.stringify({ url: githubUrl }),
     });
-    const data = await res.json();
     if (res.ok) {
       toast.success("GitHub repo processed!");
       router.push("/workspace");
