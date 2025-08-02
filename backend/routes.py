@@ -177,10 +177,12 @@ async def github_callback(code: str):
             headers={"Authorization": f"Bearer {access_token}"},
         )
         user_data = user_res.json()
+        print(user_data)
         github_id = str(user_data["id"])
         email = user_data.get("email") or f"{github_id}@users.noreply.github.com"
         
         user = session.query(User).filter(User.github_id == github_id).first()
+        
         if not user:
             user = User(github_id=github_id, email=email)
             session.add(user)
