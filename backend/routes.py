@@ -66,7 +66,6 @@ def github_process(
 ):
     token = authorization.split(" ")[1]
     payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-    print("payload:", payload)
     github_token = payload.get("github_token")  
     if not github_token:
         raise HTTPException(status_code=401, detail="Missing GitHub token")
@@ -112,9 +111,6 @@ def github_process(
 
 @router.post("/zip-processing")
 def process_zip(zip: ZipFileModel, user_id: str = Depends(get_current_user)):
-    
-    print("Uploading as user_id:", user_id)
-
     s3_key = zip.s3_key
     # frontend has uploaded zip to s3, fetch the s3 file and download a temp file from it
     with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as temp_file:
