@@ -10,8 +10,11 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from pydantic import BaseModel
 import tempfile
+import subprocess
 import zipfile
+import shutil
 import httpx
+import uuid
 import jwt
 import os
 
@@ -34,6 +37,9 @@ class UserToken(BaseModel):
 
 class AskRequest(BaseModel):
     query: str
+    
+class GitHubRepoRequest(BaseModel):
+    url: str
 
 router = APIRouter()
 BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
@@ -51,6 +57,58 @@ def get_current_user(authorization: str = Header(...)):
         raise HTTPException(status_code=401, detail="Token expired")
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid token")
+    
+@router.post("/github-process")
+def github_process(
+    repo: GitHubRepoRequest,
+    user_id: str = Depends(get_current_user),
+    authorization: str = Header(...)
+):
+    token = authorization.split(" ")[1]
+    payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+    print("payload:", payload)
+    github_token = payload.get("github_token")  
+    if not github_token:
+        raise HTTPException(status_code=401, detail="Missing GitHub token")
+
+    repo_url = repo.url
+    if not repo_url.startswith("https://github.com/"):
+        raise HTTPException(status_code=400, detail="Invalid GitHub URL")
+
+    repo_path = repo_url.replace("https://github.com/", "")
+    zip_id = str(uuid.uuid4())
+    temp_dir = f"/tmp/{zip_id}"
+    zip_path = f"/tmp/{zip_id}.zip"
+
+    authed_url = f"https://{github_token}:x-oauth-basic@github.com/{repo_path}"
+    try:
+        subprocess.run(["git", "clone", authed_url, temp_dir], check=True)
+    except subprocess.CalledProcessError:
+        raise HTTPException(status_code=500, detail="Git clone failed (private or invalid repo)")
+
+    shutil.make_archive(temp_dir, 'zip', temp_dir)
+
+    with zipfile.ZipFile(f"{temp_dir}.zip", "r") as z:
+        extract_path = temp_dir + "_unzipped"
+        z.extractall(extract_path)
+        chunks = concurrent_parse(extract_path)
+
+        for chunk in chunks:
+            chunk["user_id"] = user_id
+            enriched = embed_and_summarize_chunk(chunk)
+            insert_chunk(enriched)
+            store_embedding(enriched)
+
+    shutil.rmtree(temp_dir, ignore_errors=True)
+    shutil.rmtree(extract_path, ignore_errors=True)
+    os.remove(zip_path)
+
+    return {
+        "repo": repo_url,
+        "num_chunks": len(chunks),
+        "message": "Repo successfully processed"
+    }
+
 
 @router.post("/zip-processing")
 def process_zip(zip: ZipFileModel, user_id: str = Depends(get_current_user)):
@@ -124,7 +182,8 @@ async def github_callback(code: str):
 
         payload = {
             "sub": user_id,
-            "exp": datetime.utcnow() + timedelta(days=7),
+            "exp": datetime.utcnow() + timedelta(hours=12),
+            "github_token": access_token,
         }
         token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
