@@ -33,8 +33,10 @@ export default function Workspace() {
       })
 
       const data = await res.json()
+      type Chunk = { text: string };
+
       setAnswer(data.answer)
-      setCode(data.chunks.map((c: any) => c.text).join('\n\n'))
+      setCode((data.chunks as Chunk[]).map((c) => c.text).join('\n\n'))
     } catch (err) {
       toast.error('Error fetching answer')
     }
