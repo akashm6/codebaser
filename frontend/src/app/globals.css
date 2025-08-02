@@ -124,3 +124,8 @@
 ::selection {
   background: rgb(148, 148, 231);
 }
+
+
+html {
+  scroll-behavior: smooth;
+}
