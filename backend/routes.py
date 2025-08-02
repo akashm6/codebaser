@@ -144,6 +144,8 @@ def ask_question(req: AskRequest, user_id: str = Depends(get_current_user)):
     query = req.query
     top_chunks = search_codebase(query, user_id=user_id, k = 5) 
     answer = synthesize_answer(query, top_chunks)
+    answer = answer.replace('*', '')
+    
     return {
         "answer": answer,
         "chunks": top_chunks,
