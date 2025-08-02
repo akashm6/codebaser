@@ -1,6 +1,7 @@
 import { createHighlighter } from 'shiki'
+import { Highlighter } from 'shiki'
 
-let cachedHighlighter: any = null
+let cachedHighlighter: Highlighter | null = null
 
 export async function getHighlightedCode(code: string, lang = 'tsx') {
   if (!cachedHighlighter) {
