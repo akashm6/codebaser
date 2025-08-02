@@ -69,3 +69,5 @@ def test_conn():
     except Exception as e:
         print("DB Connection Failed.")
         print(e)
+
+create_tables()
