@@ -15,7 +15,8 @@ class Chunk(Base):
     summary = Column(String)
     
 class User(Base):
-    __table__name = "users_table"
+    
+    __tablename__ = "users_table"
     
     id = Column(Integer, primary_key=True, index=True)
     github_id = Column(String, unique=True, index=True)
