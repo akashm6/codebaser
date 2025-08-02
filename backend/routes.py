@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi import APIRouter, Query, Header, Depends
 from s3_utils import generate_presigned_url, s3
 from fastapi.responses import RedirectResponse
-from db.postgres_store import insert_chunk
+from db.postgres_store import insert_chunk, SessionLocal
+from db.models import User
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -156,6 +157,7 @@ def github_login():
 
 @router.get("/auth/github/callback")
 async def github_callback(code: str):
+    session = SessionLocal()
     async with httpx.AsyncClient() as client:
         res = await client.post(
             "https://github.com/login/oauth/access_token",
@@ -175,10 +177,18 @@ async def github_callback(code: str):
             headers={"Authorization": f"Bearer {access_token}"},
         )
         user_data = user_res.json()
-        user_id = str(user_data["id"]) 
+        github_id = str(user_data["id"])
+        email = user_data.get("email") or f"{github_id}@users.noreply.github.com"
+        
+        user = session.query(User).filter(User.github_id == github_id).first()
+        if not user:
+            user = User(github_id=github_id, email=email)
+            session.add(user)
+            session.commit()
+            session.close()
 
         payload = {
-            "sub": user_id,
+            "sub": github_id,
             "exp": datetime.utcnow() + timedelta(hours=12),
             "github_token": access_token,
         }
