@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from db.models import Base, Chunk
+from db.models import Base, Chunk, User
 from dotenv import load_dotenv
 from typing import List, Dict
 import hashlib
