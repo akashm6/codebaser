@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Codebaser – Understand Any Codebase",
     description: "Navigate unfamiliar codebases by asking questions on what you're confused about!",
-    images: ["https://ibb.co/NgtzK7W0"], 
+    images: ["https://i.ibb.co/ymdJqVgz/ographimage.png"], 
     url: "https://codebaser.vercel.app/",
     type: "website",
   },
