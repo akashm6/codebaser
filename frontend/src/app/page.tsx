@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { Github } from "lucide-react";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 export default function Home() {
   const router = useRouter();
@@ -138,7 +139,6 @@ export default function Home() {
           code with AI-powered context awareness.
         </p>
 
-        {/* GitHub Repo Button */}
         <Button
           variant="secondary"
           onClick={() =>
@@ -157,7 +157,6 @@ export default function Home() {
         </p>
       )}
 
-      {/* Upload Card */}
       <Card className="w-full max-w-md border border-border bg-card/50 backdrop-blur rounded-2xl shadow-md">
         <CardHeader>
           <CardTitle className="text-xl">Upload or Link a Repo</CardTitle>
@@ -192,6 +191,15 @@ export default function Home() {
               >
                 {isUploading ? "Uploading..." : "Upload & Analyze"}
               </Button>
+              {isUploading && (
+                <div className="mt-4 space-y-2 text-center">
+                  <Progress value={100} className="animate-pulse h-2 w-full" />
+                  <p className="text-sm text-muted-foreground">
+                    Processing… This may take up to a minute or two for larger
+                    repos.
+                  </p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="github" className="mt-4 space-y-4">
@@ -216,6 +224,15 @@ export default function Home() {
               >
                 {isUploading ? "Processing..." : "Process GitHub Repo"}
               </Button>
+              {isUploading && (
+                <div className="mt-4 space-y-2 text-center">
+                  <Progress value={100} className="animate-pulse h-2 w-full" />
+                  <p className="text-sm text-muted-foreground">
+                    Processing… This may take up to a minute or two for larger
+                    repos.
+                  </p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -237,6 +254,23 @@ export default function Home() {
       >
         ↓ Scroll to see how it works ↓
       </motion.a>
+      <div className="mt-40">
+      <h2 className="text-2xl md:text-3xl text-black font-semibold mb-4 text-center">
+        See Codebaser in Action
+      </h2>
+      <video
+        src="/demo.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="size-auto rounded-xl shadow-lg border border-border"
+      />
+      <p className="text-muted-foreground text-sm mt-4 text-center">
+        Watch how Codebaser chunks, summarizes, and answers questions about your
+        codebase.
+      </p>
+      </div>
     </main>
   );
 }
