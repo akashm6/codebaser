@@ -1,26 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 export default function Home() {
   const router = useRouter();
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [githubUrl, setGithubUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const FASTAPI_BACKEND = process.env.NEXT_PUBLIC_FASTAPI_BACKEND;
 
-  async function handleUpload() {
-    if (!zipFile) return toast.error("Please select a file");
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    console.log(token);
+    setIsAuthenticated(!!token);
+  }, []);
+
+  async function handleZipUpload() {
+    if (!zipFile) {
+      toast.error("Please select a file");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      return toast.error("Please login with GitHub first!", {
+        description: "This keeps your uploads private to your account.",
+        action: {
+          label: "Got it",
+          onClick: () => {},
+        },
+      });
+    }
     setIsUploading(true);
 
+    const token = localStorage.getItem("auth_token");
     const res = await fetch(
       `${FASTAPI_BACKEND}/generate-presigned-url?filename=${zipFile.name}&content_type=${zipFile.type}`
     );
@@ -39,8 +60,6 @@ export default function Home() {
       size: zipFile.size,
     };
 
-    const token = localStorage.getItem("auth_token");
-    console.log(token);
     const res2 = await fetch(`${FASTAPI_BACKEND}/zip-processing`, {
       method: "POST",
       headers: {
@@ -60,6 +79,39 @@ export default function Home() {
     setIsUploading(false);
   }
 
+  async function handleGithubZip() {
+    if (!isAuthenticated) {
+      return toast.error("Please login with GitHub first!", {
+        description: "This keeps your uploads private to your account.",
+        action: {
+          label: "Got it",
+          onClick: () => {},
+        },
+      });
+    }
+
+    if (!githubUrl) return toast.error("Enter a GitHub repo URL");
+    setIsUploading(true);
+
+    const token = localStorage.getItem("auth_token");
+    const res = await fetch(`${FASTAPI_BACKEND}/github-process`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ url: githubUrl }),
+    });
+
+    if (res.ok) {
+      toast.success("GitHub repo processed!");
+      router.push("/workspace");
+    } else {
+      toast.error("GitHub repo processing failed");
+    }
+    setIsUploading(false);
+  }
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-24 bg-background text-white">
       <div className="text-center mb-16">
@@ -71,13 +123,21 @@ export default function Home() {
           code instantly.
         </p>
       </div>
+
       <Button
         onClick={() =>
-          (window.location.href = `${process.env.NEXT_PUBLIC_FASTAPI_BACKEND}/auth/github/login`)
+          (window.location.href = `${FASTAPI_BACKEND}/auth/github/login`)
         }
+        className="mb-6"
       >
         Login with GitHub
       </Button>
+
+      {!isAuthenticated && (
+        <p className="text-sm text-muted-foreground mb-6">
+          You must log in to upload or process a repository.
+        </p>
+      )}
 
       <Card className="w-full max-w-md border border-border bg-card/50 backdrop-blur">
         <CardHeader>
@@ -89,28 +149,61 @@ export default function Home() {
               <TabsTrigger value="zip">ZIP Upload</TabsTrigger>
               <TabsTrigger value="github">GitHub Repo</TabsTrigger>
             </TabsList>
+
             <TabsContent value="zip" className="mt-4 space-y-4">
               <Input
                 type="file"
                 accept=".zip"
-                onChange={(e) => setZipFile(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  if (!isAuthenticated) {
+                    e.target.value = "";
+                    return toast.error("Please login with GitHub first!", {
+                      description:
+                        "This keeps your uploads private to your account.",
+                      action: {
+                        label: "Got it",
+                        onClick: () => {},
+                      },
+                    });
+                  }
+
+                  setZipFile(e.target.files?.[0] || null);
+                }}
               />
+
               <Button
-                onClick={handleUpload}
+                onClick={handleZipUpload}
                 disabled={isUploading}
                 className="w-full"
               >
                 {isUploading ? "Uploading..." : "Upload & Analyze"}
               </Button>
             </TabsContent>
+
             <TabsContent value="github" className="mt-4 space-y-4">
               <Input
                 placeholder="https://github.com/user/repo"
                 value={githubUrl}
-                onChange={(e) => setGithubUrl(e.target.value)}
+                onChange={(e) => {
+                  if (!isAuthenticated) {
+                    return toast.error("Please login with GitHub first!", {
+                      description:
+                        "This keeps your uploads private to your account.",
+                      action: {
+                        label: "Got it",
+                        onClick: () => {},
+                      },
+                    });
+                  }
+                  setGithubUrl(e.target.value);
+                }}
               />
-              <Button disabled className="w-full">
-                Coming soon
+              <Button
+                onClick={handleGithubZip}
+                disabled={isUploading}
+                className="w-full"
+              >
+                {isUploading ? "Processing..." : "Process GitHub Repo"}
               </Button>
             </TabsContent>
           </Tabs>
