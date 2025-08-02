@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "codebaser",
   description: "Navigate unfamiliar codebases!",
+  metadataBase: new URL("https://codebaser.vercel.app/")
 };
 
 export default function RootLayout({
