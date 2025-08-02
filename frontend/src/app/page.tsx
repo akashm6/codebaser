@@ -131,7 +131,7 @@ export default function Home() {
       </div>
 
       <div className="text-center mb-8">
-        <h1 className="text-5xl md:text-6xl font-bold mb-4 tracking-tight">
+        <h1 className="text-5xl md:text-6xl text-black font-bold mb-4 tracking-tight">
           Understand Any Codebase Instantly
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-6">
