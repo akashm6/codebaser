@@ -20,7 +20,6 @@ export const metadata: Metadata = {
   openGraph: {
     title: "codebaser",
     description: "Navigate unfamiliar codebases!",
-    images: ["opengraph-image.png"],
     url: "https://codebaser.vercel.app/",
   },
 };
