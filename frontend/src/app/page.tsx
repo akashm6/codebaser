@@ -142,7 +142,7 @@ export default function Home() {
         <Button
           variant="secondary"
           onClick={() =>
-            window.open("https://github.com/your-username/codebaser", "_blank")
+            window.open("https://github.com/akashm6/codebaser", "_blank")
           }
           className="gap-2 hover:scale-105 transition-transform"
         >
