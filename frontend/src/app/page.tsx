@@ -73,10 +73,20 @@ export default function Home() {
     if (res2.ok) {
       toast.success("Upload complete!");
       router.push("/workspace");
-    } else {
+    } 
+    else if (res2.status === 401) {
+      return toast.error("Please login with GitHub first!", {
+        description: "This keeps your uploads private to your account.",
+        action: {
+          label: "Got it",
+          onClick: () => {},
+        },
+      });
+    }
+    else {
       toast.error("Processing failed");
     }
-
+    
     setIsUploading(false);
   }
 
@@ -106,6 +116,11 @@ export default function Home() {
     if (res.ok) {
       toast.success("GitHub repo processed!");
       router.push("/workspace");
+    } else if (res.status === 401) {
+      return toast.error("Please login with GitHub first!", {
+        description: "This keeps your uploads private to your account.",
+        action: { label: "Got it", onClick: () => {} },
+      });
     } else {
       toast.error("GitHub repo processing failed");
     }
@@ -244,21 +259,21 @@ export default function Home() {
         ↓ Scroll to see how it works ↓
       </motion.a>
       <div className="mt-40">
-      <h2 className="text-2xl md:text-3xl text-black font-semibold mb-4 text-center">
-        See Codebaser in Action
-      </h2>
-      <video
-        src="/demo.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="size-auto rounded-xl shadow-lg border border-border"
-      />
-      <p className="text-muted-foreground text-sm mt-4 text-center">
-        Watch how Codebaser chunks, summarizes, and answers questions about your
-        codebase.
-      </p>
+        <h2 className="text-2xl md:text-3xl text-black font-semibold mb-4 text-center">
+          See Codebaser in Action
+        </h2>
+        <video
+          src="/demo.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="size-auto rounded-xl shadow-lg border border-border"
+        />
+        <p className="text-muted-foreground text-sm mt-4 text-center">
+          Watch how Codebaser chunks, summarizes, and answers questions about
+          your codebase.
+        </p>
       </div>
     </main>
   );
