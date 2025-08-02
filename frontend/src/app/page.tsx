@@ -121,7 +121,7 @@ export default function Home() {
         <Button
           variant="secondary"
           onClick={() =>
-            window.open("https://github.com/your-username/codebaser", "_blank")
+            window.open("https://github.com/akashm6/codebaser", "_blank")
           }
           className="gap-2 hover:scale-105 transition-transform"
         >
@@ -138,17 +138,6 @@ export default function Home() {
           Upload a zip file or GitHub repo and start asking questions about your
           code with AI-powered context awareness.
         </p>
-
-        <Button
-          variant="secondary"
-          onClick={() =>
-            window.open("https://github.com/akashm6/codebaser", "_blank")
-          }
-          className="gap-2 hover:scale-105 transition-transform"
-        >
-          <Github className="w-4 h-4" />
-          View GitHub Repo
-        </Button>
       </div>
 
       {!isAuthenticated && (
