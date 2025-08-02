@@ -16,7 +16,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "codebaser",
   description: "Navigate unfamiliar codebases!",
-  metadataBase: new URL("https://codebaser.vercel.app/")
+  metadataBase: new URL("https://codebaser.vercel.app/"),
+  openGraph: {
+    title: "codebaser",
+    description: "Navigate unfamiliar codebases!",
+    images: ["opengraph-image.png"],
+    url: "https://codebaser.vercel.app/",
+  },
 };
 
 export default function RootLayout({
