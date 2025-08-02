@@ -16,13 +16,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "codebaser",
   description: "Navigate unfamiliar codebases!",
-  openGraph: {
-    title: "Codebaser – Understand Any Codebase",
-    description: "Navigate unfamiliar codebases by asking questions on what you're confused about!",
-    images: ["https://i.ibb.co/ymdJqVgz/ographimage.png"], 
-    url: "https://codebaser.vercel.app/",
-    type: "website",
-  },
 };
 
 export default function RootLayout({
