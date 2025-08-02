@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
+import { Github } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Home() {
@@ -111,25 +112,44 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-24 bg-background text-white">
-      <div className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-          AI-Powered Codebase Intelligence
-        </h1>
-        <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-          Upload a zip file or GitHub repo and start asking questions about your
-          code instantly.
-        </p>
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-16 bg-background text-white">
+      <div className="absolute top-6 w-full px-6 flex items-center justify-between">
+        <div className="text-xl text-black font-semibold tracking-tight">
+          codebaser
+        </div>
+        <Button
+          variant="secondary"
+          onClick={() =>
+            window.open("https://github.com/your-username/codebaser", "_blank")
+          }
+          className="gap-2 hover:scale-105 transition-transform"
+        >
+          <Github className="w-4 h-4" />
+          GitHub
+        </Button>
       </div>
 
-      <Button
-        onClick={() =>
-          (window.location.href = `${FASTAPI_BACKEND}/auth/github/login`)
-        }
-        className="mb-6"
-      >
-        Login with GitHub
-      </Button>
+      <div className="text-center mb-8">
+        <h1 className="text-5xl md:text-6xl font-bold mb-4 tracking-tight">
+          Understand Any Codebase Instantly
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-6">
+          Upload a zip file or GitHub repo and start asking questions about your
+          code with AI-powered context awareness.
+        </p>
+
+        {/* GitHub Repo Button */}
+        <Button
+          variant="secondary"
+          onClick={() =>
+            window.open("https://github.com/your-username/codebaser", "_blank")
+          }
+          className="gap-2 hover:scale-105 transition-transform"
+        >
+          <Github className="w-4 h-4" />
+          View GitHub Repo
+        </Button>
+      </div>
 
       {!isAuthenticated && (
         <p className="text-sm text-muted-foreground mb-6">
@@ -137,7 +157,8 @@ export default function Home() {
         </p>
       )}
 
-      <Card className="w-full max-w-md border border-border bg-card/50 backdrop-blur">
+      {/* Upload Card */}
+      <Card className="w-full max-w-md border border-border bg-card/50 backdrop-blur rounded-2xl shadow-md">
         <CardHeader>
           <CardTitle className="text-xl">Upload or Link a Repo</CardTitle>
         </CardHeader>
@@ -158,17 +179,12 @@ export default function Home() {
                     return toast.error("Please login with GitHub first!", {
                       description:
                         "This keeps your uploads private to your account.",
-                      action: {
-                        label: "Got it",
-                        onClick: () => {},
-                      },
+                      action: { label: "Got it", onClick: () => {} },
                     });
                   }
-
                   setZipFile(e.target.files?.[0] || null);
                 }}
               />
-
               <Button
                 onClick={handleZipUpload}
                 disabled={isUploading}
@@ -187,10 +203,7 @@ export default function Home() {
                     return toast.error("Please login with GitHub first!", {
                       description:
                         "This keeps your uploads private to your account.",
-                      action: {
-                        label: "Got it",
-                        onClick: () => {},
-                      },
+                      action: { label: "Got it", onClick: () => {} },
                     });
                   }
                   setGithubUrl(e.target.value);
@@ -207,14 +220,23 @@ export default function Home() {
           </Tabs>
         </CardContent>
       </Card>
-
-      <motion.div
+      <Button
+        onClick={() =>
+          (window.location.href = `${FASTAPI_BACKEND}/auth/github/login`)
+        }
+        className="mt-6 gap-2 hover:scale-105 transition-transform"
+      >
+        <Github className="w-4 h-4" />
+        Login with GitHub
+      </Button>
+      <motion.a
+        href="#demo"
         animate={{ y: [0, -8, 0] }}
         transition={{ repeat: Infinity, duration: 1.5 }}
-        className="mt-24 text-muted-foreground text-sm"
+        className="mt-20 text-muted-foreground text-sm cursor-pointer"
       >
         ↓ Scroll to see how it works ↓
-      </motion.div>
+      </motion.a>
     </main>
   );
 }
